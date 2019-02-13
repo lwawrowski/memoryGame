@@ -14,10 +14,10 @@ library(tidyverse)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-   
-  output$distPlot <- renderPlot({
-    
-    # baza <- readxl::read_xlsx("app/baza.xlsx")
+  
+  game <- reactiveValues(data = NULL)
+  
+  new_game <- reactive({
     
     baza <- readxl::read_xlsx("baza.xlsx")
     
@@ -32,7 +32,24 @@ shinyServer(function(input, output) {
     d <- expand.grid(x = 1:n, y = 1:n)
     d$label <- sample(labels$wart)
     
-    ggplot(d, aes(x=x, y=y)) + 
+    d <- d %>%
+      mutate(x_lower = x - 0.5,
+             x_upper = x + 0.5,
+             y_lower = y - 0.5,
+             y_upper = y + 0.5)
+    
+    game$data <- list(baza=baza,
+                      map=d)
+    
+  })
+  
+  output$distPlot <- renderPlot({
+    
+    new_game()
+    
+    # baza <- readxl::read_xlsx("app/baza.xlsx")
+    
+    ggplot(game$data$map, aes(x=x, y=y)) + 
       geom_tile(fill="#e5f5f9", colour = "gray80") +
       geom_text(aes(label = label)) +
       theme_minimal() +
@@ -53,10 +70,17 @@ shinyServer(function(input, output) {
     y <- input$plot_click$y
     
     if(is.numeric(x) & is.numeric(y)){
+      
+      n <- sqrt(nrow(game$data$map))
+      
       if(x > 0.5 & y > 0.5 & x < n + 0.5 & y < n + 0.5){
         
-        # do poprawy
-        val <- d$label[x > d$x-0.5 & x < d$x+0.5 & y > d$y-0.5 & y < d$y+0.5]
+        # x <- 1.75
+        # y <- 1.2
+        
+        d <- game$data$map
+        
+        val <- d$label[x > d$x_lower & x < d$x_upper & y > d$y_lower & y < d$y_upper]
         
         return(val)
       } 
