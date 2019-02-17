@@ -11,6 +11,7 @@
 
 library(shiny)
 library(tidyverse)
+library(magrittr)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -19,7 +20,8 @@ shinyServer(function(input, output) {
   
   new_game <- reactive({
     
-    baza <- readxl::read_xlsx("baza.xlsx")
+    baza <- readxl::read_xlsx("baza.xlsx") %>%
+      mutate_if(is.numeric, as.character)
     
     labels <- baza %>%
       gather(cz, wart, -poziom) %>%
@@ -33,25 +35,31 @@ shinyServer(function(input, output) {
     d$label <- sample(labels$wart)
     
     d <- d %>%
-      mutate(x_lower = x - 0.5,
+      mutate(label_show="",
+             x_lower = x - 0.5,
              x_upper = x + 0.5,
              y_lower = y - 0.5,
              y_upper = y + 0.5)
     
     game$data <- list(baza=baza,
-                      map=d)
+                      map=d,
+                      clicks=0,
+                      click1="",
+                      click2="")
     
   })
   
-  output$distPlot <- renderPlot({
+  observeEvent(input$newGame, {
     
     new_game()
     
-    # baza <- readxl::read_xlsx("app/baza.xlsx")
+  })
+  
+  render_map <- reactive({
     
     ggplot(game$data$map, aes(x=x, y=y)) + 
       geom_tile(fill="#e5f5f9", colour = "gray80") +
-      geom_text(aes(label = label)) +
+      geom_text(aes(label = label_show)) +
       theme_minimal() +
       theme(axis.title = element_blank(),
             axis.text = element_blank(),
@@ -60,31 +68,129 @@ shinyServer(function(input, output) {
     
   })
   
+  output$distPlot <- renderPlot({
+    
+    # baza <- readxl::read_xlsx("app/baza.xlsx")
+    
+    if(!is.null(game$data)){
+        render_map()
+    }
+    
+  })
+  
   output$info <- renderText({
-    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value())
+    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), "\nclicks: ", game$data$clicks)
   })
   
   clicked_value <- reactive({
-  
-    x <- input$plot_click$x
-    y <- input$plot_click$y
     
-    if(is.numeric(x) & is.numeric(y)){
+    if(!is.null(game$data)){
+      x <- input$plot_click$x
+      y <- input$plot_click$y
       
-      n <- sqrt(nrow(game$data$map))
-      
-      if(x > 0.5 & y > 0.5 & x < n + 0.5 & y < n + 0.5){
+      if(is.numeric(x) & is.numeric(y)){
         
-        # x <- 1.75
-        # y <- 1.2
+        n <- sqrt(nrow(game$data$map))
         
-        d <- game$data$map
-        
-        val <- d$label[x > d$x_lower & x < d$x_upper & y > d$y_lower & y < d$y_upper]
-        
-        return(val)
-      } 
+        if(x > 0.5 & y > 0.5 & x < n + 0.5 & y < n + 0.5){
+          
+          d <- game$data$map
+          
+          val <- d$label[x > d$x_lower & x < d$x_upper & y > d$y_lower & y < d$y_upper]
+          
+          return(val)
+        } 
+      }
     }
+    
+  })
+  
+  is_already_clicked <- function(tile_val){
+    
+    result <- FALSE
+    
+    if(is.character(tile_val)){
+      
+      label_show <- game$data$map$label_show[game$data$map$label == tile_val]
+      
+      result <- ifelse(label_show != "", TRUE, FALSE)
+      
+    }
+    
+    return(result)
+    
+  }
+  
+  timer <- reactiveTimer(2000)
+  
+  observeEvent(input$plot_click, {
+    
+    tile_val <- clicked_value()
+    
+    if(is.character(tile_val)){
+      # pokaż kliknięte pole - zmień obiekt
+      # jeśli dwa kliknięta pola nie pasują - ukryj
+      # jeśli pasują to odnotuj w głównym obiekcie i nie ukrywaj
+      
+      if(game$data$clicks == 0){
+        game$data$click1 <- tile_val
+        
+        # nie licz kliknięcia na już odsłonięte
+        if(!is_already_clicked(tile_val)){
+          click <- game$data$clicks
+          game$data$clicks <- click + 1
+          game$data$map$label_show[game$data$map$label == tile_val] <- tile_val
+        }
+        
+      } else if (game$data$clicks == 1){
+        game$data$click2 <- tile_val
+        
+        # nie licz kliknięcia na już odsłonięte
+        if(!is_already_clicked(tile_val)){
+          click <- game$data$clicks
+          game$data$clicks <- click + 1
+          game$data$map$label_show[game$data$map$label == tile_val] <- tile_val
+        }
+        
+        if(game$data$clicks == 2){
+          
+          df <- game$data$baza[game$data$baza$cz1 == game$data$click1 & game$data$baza$cz2 == game$data$click2,]
+          
+          if(nrow(df) != 1){
+            
+            # zaktualizuj dopiero po chwili
+            
+            # game$data$map$label_show[game$data$map$label == game$data$click1] <- ""
+            # game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
+            invalidateLater(5000)
+            clear_map()
+            
+          }
+          
+          game$data$clicks <- 0
+          
+        }
+        
+      } 
+      
+    }
+    
+  })
+  
+  clear_map <- reactive({
+    
+    # map_temp <- game$data$map
+    # 
+    # map_temp$label_show[map_temp$label == game$data$click1] <- ""
+    # map_temp$label_show[map_temp$label == game$data$click2] <- ""
+    # 
+    # map_temp
+    # timer()
+    
+    
+    game$data$map$label_show[game$data$map$label == game$data$click1] <- ""
+    game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
+    
     
   })
   
