@@ -94,21 +94,24 @@ shinyServer(function(input, output) {
   clicked_value <- reactive({
     
     if(!is.null(game$data)){
-      x <- input$plot_click$x
-      y <- input$plot_click$y
-      
-      if(is.numeric(x) & is.numeric(y)){
+      if(game$data$clicks != 2){
         
-        n <- sqrt(nrow(game$data$map))
+        x <- input$plot_click$x
+        y <- input$plot_click$y
         
-        if(x > 0.5 & y > 0.5 & x < n + 0.5 & y < n + 0.5){
+        if(is.numeric(x) & is.numeric(y)){
           
-          d <- game$data$map
+          n <- sqrt(nrow(game$data$map))
           
-          val <- d$label[x > d$x_lower & x < d$x_upper & y > d$y_lower & y < d$y_upper]
-          
-          return(val)
-        } 
+          if(x > 0.5 & y > 0.5 & x < n + 0.5 & y < n + 0.5){
+            
+            d <- game$data$map
+            
+            val <- d$label[x > d$x_lower & x < d$x_upper & y > d$y_lower & y < d$y_upper]
+            
+            return(val)
+          } 
+        }
       }
     }
     
@@ -137,9 +140,8 @@ shinyServer(function(input, output) {
     tile_val <- clicked_value()
     
     if(is.character(tile_val)){
-      # pokaż kliknięte pole - zmień obiekt
-      # jeśli dwa kliknięta pola nie pasują - ukryj
-      # jeśli pasują to odnotuj w głównym obiekcie i nie ukrywaj
+      
+      # zablokuj kliknięcia zanim licznik kliknięć nie będzie wyzerowany
       
       if(game$data$clicks == 0){
         game$data$click1 <- tile_val
@@ -168,7 +170,7 @@ shinyServer(function(input, output) {
           
           if(nrow(df) != 1){
             
-            delay(1000, clear_map())
+            delay(3000, clear_map())
             
           } else {
             
@@ -177,13 +179,13 @@ shinyServer(function(input, output) {
             
             df_labels <- game$data$map[game$data$map$label_show == "",]
             
+            game$data$clicks <- 0
+            
             if(nrow(df_labels) == 0){
               showModal(modalDialog(title = "Koniec gry", "Gratulacje!", footer = modalButton("Zamknij")))
             }
             
           }
-          
-          game$data$clicks <- 0
           
         }
         
@@ -197,6 +199,8 @@ shinyServer(function(input, output) {
     
     game$data$map$label_show[game$data$map$label == game$data$click1] <- ""
     game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
+    
+    game$data$clicks <- 0
     
   })
   
