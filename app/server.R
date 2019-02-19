@@ -1,14 +1,3 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
-# https://github.com/wilkox/ggfittext
-
 library(shiny)
 library(tidyverse)
 library(shinyjs)
@@ -20,8 +9,15 @@ shinyServer(function(input, output) {
   
   new_game <- reactive({
     
+    game$data <- NULL
+    
     baza <- readxl::read_xlsx("baza.xlsx") %>%
       mutate_if(is.numeric, as.character)
+    
+    # baza <- readxl::read_xlsx("app/baza.xlsx") %>%
+    #   mutate_if(is.numeric, as.character)
+    # 
+    # baza[baza$cz1 %in% c("1", "b") & baza$cz2 %in% c("b", "1"), ]
     
     labels <- baza %>%
       gather(cz, wart, -poziom) %>%
@@ -72,8 +68,6 @@ shinyServer(function(input, output) {
   
   output$distPlot <- renderPlot({
     
-    # baza <- readxl::read_xlsx("app/baza.xlsx")
-    
     if(!is.null(game$data)){
         render_map()
     }
@@ -81,8 +75,9 @@ shinyServer(function(input, output) {
   })
   
   output$info <- renderText({
-    # paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), "\nclicks: ", game$data$clicks)
-    paste0("Points: ", game$data$points)
+    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), 
+           "\nclicks: ", game$data$clicks, "\nc1: ", game$data$click1, "\nc2: ", game$data$click2)
+    # paste0("Points: ", game$data$points)
   })
   
   clicked_value <- reactive({
@@ -157,7 +152,8 @@ shinyServer(function(input, output) {
         
         if(game$data$clicks == 2){
           
-          df <- game$data$baza[game$data$baza$cz1 == game$data$click1 & game$data$baza$cz2 == game$data$click2,]
+          df <- game$data$baza[game$data$baza$cz1 %in% c(game$data$click1, game$data$click2) & 
+                                 game$data$baza$cz2 %in% c(game$data$click1, game$data$click2),]
           
           if(nrow(df) != 1){
             
@@ -167,6 +163,12 @@ shinyServer(function(input, output) {
             
             points <- game$data$points
             game$data$points <- points + 1
+            
+            df_labels <- game$data$map[game$data$map$label_show == "",]
+            
+            if(nrow(df_labels) == 0){
+              showModal(modalDialog(title = "Koniec gry", "Gratulacje!", footer = modalButton("Zamknij")))
+            }
             
           }
           
@@ -186,7 +188,5 @@ shinyServer(function(input, output) {
     game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
     
   })
-  
-  
   
 })
