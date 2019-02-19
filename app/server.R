@@ -1,8 +1,8 @@
 library(shiny)
 library(tidyverse)
 library(shinyjs)
+library(ggfittext)
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
   game <- reactiveValues(data = NULL)
@@ -11,8 +11,16 @@ shinyServer(function(input, output) {
     
     game$data <- NULL
     
-    baza <- readxl::read_xlsx("baza.xlsx") %>%
+    colors <- grDevices::colors()[grep("gr(a|e)y", grDevices::colors(), invert = T)]
+    
+    # kolory dla par
+    baza <- readxl::read_xlsx("baza.xlsx", sheet = 2) %>%
       mutate_if(is.numeric, as.character)
+    
+    # set.seed(123)
+    colors_database <- sample(colors, nrow(baza))
+    
+    baza$colour <- colors_database
     
     # baza <- readxl::read_xlsx("app/baza.xlsx") %>%
     #   mutate_if(is.numeric, as.character)
@@ -20,16 +28,18 @@ shinyServer(function(input, output) {
     # baza[baza$cz1 %in% c("1", "b") & baza$cz2 %in% c("b", "1"), ]
     
     labels <- baza %>%
-      gather(cz, wart, -poziom) %>%
+      gather(cz, label, -poziom, -colour) %>%
       select(-poziom, -cz) %>%
       as.data.frame %>%
-      mutate(wart=as.character(wart))
+      mutate(label=as.character(label))
     
     n <- sqrt(nrow(labels))
     
     d <- expand.grid(x = 1:n, y = 1:n)
-    #d$label <- sample(labels$wart)
-    d$label <- labels$wart
+    d$label <- sample(labels$label)
+    # d$label <- labels$wart
+    
+    d <- inner_join(d, labels, by = "label")
     
     d <- d %>%
       mutate(label_show="",
@@ -57,12 +67,13 @@ shinyServer(function(input, output) {
     
     ggplot(game$data$map, aes(x=x, y=y)) + 
       geom_tile(fill="#e5f5f9", colour = "gray80") +
-      geom_text(aes(label = label_show)) +
+      geom_fit_text(aes(label = label_show, colour = colour), reflow = T) +
       theme_minimal() +
       theme(axis.title = element_blank(),
             axis.text = element_blank(),
             axis.ticks = element_blank(),
-            panel.grid = element_blank())
+            panel.grid = element_blank(),
+            legend.position = "none")
     
   })
   

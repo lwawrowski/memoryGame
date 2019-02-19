@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(shinyjs)
+library(ggfittext)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
