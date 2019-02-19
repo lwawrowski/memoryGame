@@ -27,11 +27,6 @@ shinyServer(function(input, output) {
     
     database$colour <- colors_database
     
-    # database <- readxl::read_xlsx("app/database.xlsx") %>%
-    #   mutate_if(is.numeric, as.character)
-    # 
-    # database[database$cz1 %in% c("1", "b") & database$cz2 %in% c("b", "1"), ]
-    
     labels <- database %>%
       gather(cz, label, -poziom, -colour) %>%
       select(-poziom, -cz) %>%
@@ -72,7 +67,7 @@ shinyServer(function(input, output) {
     
     ggplot(game$data$map, aes(x=x, y=y)) + 
       geom_tile(fill="#e5f5f9", colour = "gray80") +
-      geom_fit_text(aes(label = label_show, colour = colour), reflow = T) +
+      geom_fit_text(aes(label = label_show, colour = colour), reflow = T, min.size = 6) +
       theme_minimal() +
       theme(axis.title = element_blank(),
             axis.text = element_blank(),
@@ -90,11 +85,10 @@ shinyServer(function(input, output) {
     
   })
   
-  output$info <- renderText({
-    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), 
-           "\nclicks: ", game$data$clicks, "\nc1: ", game$data$click1, "\nc2: ", game$data$click2)
-    # paste0("Points: ", game$data$points)
-  })
+  # output$info <- renderText({
+  #   paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), 
+  #          "\nclicks: ", game$data$clicks, "\nc1: ", game$data$click1, "\nc2: ", game$data$click2)
+  # })
   
   clicked_value <- reactive({
     
@@ -146,12 +140,9 @@ shinyServer(function(input, output) {
     
     if(is.character(tile_val)){
       
-      # zablokuj kliknięcia zanim licznik kliknięć nie będzie wyzerowany
-      
       if(game$data$clicks == 0){
         game$data$click1 <- tile_val
         
-        # nie licz kliknięcia na już odsłonięte
         if(!is_already_clicked(tile_val)){
           click <- game$data$clicks
           game$data$clicks <- click + 1
@@ -161,7 +152,6 @@ shinyServer(function(input, output) {
       } else if (game$data$clicks == 1){
         game$data$click2 <- tile_val
         
-        # nie licz kliknięcia na już odsłonięte
         if(!is_already_clicked(tile_val)){
           click <- game$data$clicks
           game$data$clicks <- click + 1
@@ -174,11 +164,11 @@ shinyServer(function(input, output) {
                                  game$data$database$cz2 %in% c(game$data$click1, game$data$click2),]
           
           points <- game$data$points
-          game$data$points <- points + 2
+          game$data$points <- points + 1
           
           if(nrow(df) != 1){
             
-            delay(3000, clear_map())
+            delay(2500, clear_map())
             
           } else {
             
@@ -187,9 +177,12 @@ shinyServer(function(input, output) {
             game$data$clicks <- 0
             
             if(nrow(df_labels) == 0){
-              showModal(modalDialog(title = "Koniec gry", 
-                                    paste0("Gratulacje! Twój wynik to: ", game$data$points, " kliknięć."), 
-                                    footer = modalButton("Zamknij")))
+              
+              # data, poziom, liczba ruchów
+              
+              delay(1000, showModal(modalDialog(title = "Koniec gry", 
+                                    paste0("Gratulacje! Twój wynik to: ", game$data$points, " ruchów."), 
+                                    footer = modalButton("Zamknij"))))
             }
             
           }
