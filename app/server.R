@@ -11,7 +11,7 @@
 
 library(shiny)
 library(tidyverse)
-library(magrittr)
+library(shinyjs)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -32,7 +32,8 @@ shinyServer(function(input, output) {
     n <- sqrt(nrow(labels))
     
     d <- expand.grid(x = 1:n, y = 1:n)
-    d$label <- sample(labels$wart)
+    #d$label <- sample(labels$wart)
+    d$label <- labels$wart
     
     d <- d %>%
       mutate(label_show="",
@@ -45,7 +46,8 @@ shinyServer(function(input, output) {
                       map=d,
                       clicks=0,
                       click1="",
-                      click2="")
+                      click2="",
+                      points=0)
     
   })
   
@@ -158,12 +160,7 @@ shinyServer(function(input, output) {
           
           if(nrow(df) != 1){
             
-            # zaktualizuj dopiero po chwili
-            
-            # game$data$map$label_show[game$data$map$label == game$data$click1] <- ""
-            # game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
-            invalidateLater(5000)
-            clear_map()
+            delay(1000, clear_map())
             
           }
           
@@ -179,18 +176,8 @@ shinyServer(function(input, output) {
   
   clear_map <- reactive({
     
-    # map_temp <- game$data$map
-    # 
-    # map_temp$label_show[map_temp$label == game$data$click1] <- ""
-    # map_temp$label_show[map_temp$label == game$data$click2] <- ""
-    # 
-    # map_temp
-    # timer()
-    
-    
     game$data$map$label_show[game$data$map$label == game$data$click1] <- ""
     game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
-    
     
   })
   

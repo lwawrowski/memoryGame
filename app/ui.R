@@ -1,8 +1,11 @@
 library(shiny)
 library(tidyverse)
+library(shinyjs)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
+  
+  useShinyjs(),
   
   # Application title
   titlePanel("Memory Game"),
