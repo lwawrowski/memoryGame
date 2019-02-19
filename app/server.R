@@ -16,7 +16,12 @@ shinyServer(function(input, output) {
     import <- readxl::read_xlsx("baza.xlsx", sheet = 2) %>%
       mutate_if(is.numeric, as.character)
     
-    database <- import[import$poziom == input$level,]
+    if(input$level == "0"){
+      database <- import %>%
+        sample_n(8)
+    } else {
+      database <- import[import$poziom == input$level,]
+    }
   
     colors_database <- sample(colors, nrow(database))
     

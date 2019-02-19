@@ -15,7 +15,8 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       radioButtons("level", "Zakres materiału", c("Miary klasyczne - symbole" = "1",
-                                                  "Miary klasyczne - interpretacje" = "2")),
+                                                  "Miary klasyczne - interpretacje" = "2",
+                                                  "Wszystko - losowo" = "0")),
       actionButton("newGame", "Nowa gra")
     ),
     # Show a plot of the generated distribution
