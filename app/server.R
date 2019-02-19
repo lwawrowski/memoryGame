@@ -13,21 +13,21 @@ shinyServer(function(input, output) {
     
     colors <- grDevices::colors()[grep("gr(a|e)y", grDevices::colors(), invert = T)]
     
-    # kolory dla par
-    baza <- readxl::read_xlsx("baza.xlsx", sheet = 2) %>%
+    import <- readxl::read_xlsx("baza.xlsx", sheet = 2) %>%
       mutate_if(is.numeric, as.character)
     
-    # set.seed(123)
-    colors_database <- sample(colors, nrow(baza))
+    database <- import[import$poziom == input$level,]
+  
+    colors_database <- sample(colors, nrow(database))
     
-    baza$colour <- colors_database
+    database$colour <- colors_database
     
-    # baza <- readxl::read_xlsx("app/baza.xlsx") %>%
+    # database <- readxl::read_xlsx("app/database.xlsx") %>%
     #   mutate_if(is.numeric, as.character)
     # 
-    # baza[baza$cz1 %in% c("1", "b") & baza$cz2 %in% c("b", "1"), ]
+    # database[database$cz1 %in% c("1", "b") & database$cz2 %in% c("b", "1"), ]
     
-    labels <- baza %>%
+    labels <- database %>%
       gather(cz, label, -poziom, -colour) %>%
       select(-poziom, -cz) %>%
       as.data.frame %>%
@@ -48,7 +48,7 @@ shinyServer(function(input, output) {
              y_lower = y - 0.5,
              y_upper = y + 0.5)
     
-    game$data <- list(baza=baza,
+    game$data <- list(database=database,
                       map=d,
                       clicks=0,
                       click1="",
@@ -165,8 +165,11 @@ shinyServer(function(input, output) {
         
         if(game$data$clicks == 2){
           
-          df <- game$data$baza[game$data$baza$cz1 %in% c(game$data$click1, game$data$click2) & 
-                                 game$data$baza$cz2 %in% c(game$data$click1, game$data$click2),]
+          df <- game$data$database[game$data$database$cz1 %in% c(game$data$click1, game$data$click2) & 
+                                 game$data$database$cz2 %in% c(game$data$click1, game$data$click2),]
+          
+          points <- game$data$points
+          game$data$points <- points + 2
           
           if(nrow(df) != 1){
             
@@ -174,15 +177,14 @@ shinyServer(function(input, output) {
             
           } else {
             
-            points <- game$data$points
-            game$data$points <- points + 1
-            
             df_labels <- game$data$map[game$data$map$label_show == "",]
             
             game$data$clicks <- 0
             
             if(nrow(df_labels) == 0){
-              showModal(modalDialog(title = "Koniec gry", "Gratulacje!", footer = modalButton("Zamknij")))
+              showModal(modalDialog(title = "Koniec gry", 
+                                    paste0("Gratulacje! Twój wynik to: ", game$data$points, " kliknięć."), 
+                                    footer = modalButton("Zamknij")))
             }
             
           }

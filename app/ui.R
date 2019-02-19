@@ -14,10 +14,10 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
+      radioButtons("level", "Zakres materiału", c("Miary klasyczne - symbole" = "1",
+                                                  "Miary klasyczne - interpretacje" = "2")),
       actionButton("newGame", "Nowa gra")
-
-          ),
-    
+    ),
     # Show a plot of the generated distribution
     mainPanel(
        plotOutput("distPlot", click = "plot_click"),
