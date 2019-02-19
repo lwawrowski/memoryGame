@@ -81,7 +81,8 @@ shinyServer(function(input, output) {
   })
   
   output$info <- renderText({
-    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), "\nclicks: ", game$data$clicks)
+    # paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y, "\nval: ", clicked_value(), "\nclicks: ", game$data$clicks)
+    paste0("Points: ", game$data$points)
   })
   
   clicked_value <- reactive({
@@ -162,6 +163,11 @@ shinyServer(function(input, output) {
             
             delay(1000, clear_map())
             
+          } else {
+            
+            points <- game$data$points
+            game$data$points <- points + 1
+            
           }
           
           game$data$clicks <- 0
@@ -180,5 +186,7 @@ shinyServer(function(input, output) {
     game$data$map$label_show[game$data$map$label == game$data$click2] <- ""
     
   })
+  
+  
   
 })
