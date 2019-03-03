@@ -1,29 +1,20 @@
 library(shiny)
+library(shinydashboard)
 library(tidyverse)
 library(shinyjs)
 library(ggfittext)
 
 # zbieranie danych na temat liczby ruchów
-# dashboard
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
-  
-  useShinyjs(),
-  
-  titlePanel("Statystyczna pamięć"),
-  
-  sidebarLayout(
-    sidebarPanel(
-      radioButtons("level", "Zakres materiału", c("Miary klasyczne - symbole" = "1",
-                                                  "Miary klasyczne - interpretacje" = "2",
-                                                  "Wszystko - losowo" = "0")),
-      actionButton("newGame", "Nowa gra")
-    ),
-
-    mainPanel(
-       plotOutput("distPlot", click = "plot_click", width = "800px", height = "500px")
-       # verbatimTextOutput("info")
-    )
-  )
-))
+dashboardPage(
+  dashboardHeader(title = "Statystyczna pamięć"),
+  dashboardSidebar(radioButtons("level", "Zakres materiału", c("Miary klasyczne - symbole" = "1",
+                                                               "Miary klasyczne - interpretacje" = "2",
+                                                               "Wszystko - losowo" = "0")),
+                   actionButton("newGame", "Nowa gra")),
+  dashboardBody(
+    useShinyjs(),
+    fluidRow(
+    box(plotOutput("distPlot", click = "plot_click", width = "800px", height = "500px"), width = 9)
+  ))
+)
