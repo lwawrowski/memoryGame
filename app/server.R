@@ -214,6 +214,17 @@ shinyServer(function(input, output) {
     
   })
   
+  output$moves <- renderInfoBox({
+
+    moves <- ""
+
+    if(!is.null(game$data)){
+      moves <- game$data$points
+    }
+
+    infoBox("Ruchy", moves, icon = icon("bullseye"), color = "blue")
+  })
+  
   # output$top <- renderInfoBox({
   #   
   #   chance_info_text <- ""
