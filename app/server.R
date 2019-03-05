@@ -43,12 +43,31 @@ shinyServer(function(input, output) {
              y_lower = y - 0.5,
              y_upper = y + 0.5)
     
+    # load log
+    
+    gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
+    
+    log <- gs_read(gs) %>%
+      filter(poziom==input$level)
+    
+    if(nrow(log)>0){
+      top <- max(log$ruchy)
+    } else{
+      top <- "-"
+    }
+    
+    
+    # game object
+    
     game$data <- list(database=database,
                       map=d,
                       clicks=0,
                       click1="",
                       click2="",
-                      points=0)
+                      points=0,
+                      gs=gs,
+                      top=top,
+                      end_game=0)
     
   })
   
@@ -179,10 +198,12 @@ shinyServer(function(input, output) {
                                 poziom=input$level,
                                 ruchy=game$data$points)
               
-              gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
+              gs <- game$data$gs
               
               # gs_edit_cells(gs, ws = "log", input = log, trim = TRUE)
               gs_add_row(gs, ws = "log", input = log)
+              
+              game$data$end <- 1
               
               delay(1500, showModal(modalDialog(title = "Koniec gry", 
                                     paste0("Gratulacje! Twój wynik to: ", game$data$points, " ruchów."), 
@@ -222,15 +243,23 @@ shinyServer(function(input, output) {
   
   output$top <- renderInfoBox({
 
-    top <- ""
+    top <- "-"
 
     if(!is.null(game$data)){
-      gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
       
-      d <- gs_read(gs) %>%
-        filter(poziom==input$level)
+      if(game$data$end==0){
+        top <- game$data$top
+      } else{
+        
+        log <- gs_read(gs) %>%
+          filter(poziom==input$level)
+        
+        if(nrow(log)>0){
+          top <- max(log$ruchy)
+        }  
+      }
       
-      top <- max(d$ruchy)
+      
     }
 
     infoBox("Rekord", top, icon = icon("bullseye"), color = "blue")
