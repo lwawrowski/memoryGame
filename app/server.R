@@ -173,20 +173,21 @@ shinyServer(function(input, output) {
             
             if(nrow(df_labels) == 0){
               
-              delay(1000, showModal(modalDialog(title = "Koniec gry", 
-                                    paste0("Gratulacje! Twój wynik to: ", game$data$points, " ruchów."), 
-                                    footer = modalButton("Zamknij"))))
-              
               # log
-              # data, poziom, liczba ruchów
               
               log <- data.frame(data=Sys.Date(),
                                 poziom=input$level,
                                 ruchy=game$data$points)
               
-              # gs <- gs_key("18eb9ugopPJ4o5agw_z77vInJC3MtphYMIQ_4p9ZRnLM")
-              # 
-              # gs_add_row(gs, ws = "log", input = log)
+              gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
+              
+              # gs_edit_cells(gs, ws = "log", input = log, trim = TRUE)
+              gs_add_row(gs, ws = "log", input = log)
+              
+              delay(1500, showModal(modalDialog(title = "Koniec gry", 
+                                    paste0("Gratulacje! Twój wynik to: ", game$data$points, " ruchów."), 
+                                    footer = modalButton("Zamknij"))))
+              
             }
             
           }
@@ -219,19 +220,21 @@ shinyServer(function(input, output) {
     infoBox("Ruchy", moves, icon = icon("bullseye"), color = "blue")
   })
   
-  # output$top <- renderInfoBox({
-  #   
-  #   chance_info_text <- ""
-  #   
-  #   if(!is.null(game$map)){
-  #     if(is_unit_hovered() & game$map$unit_clicked != ""){
-  #       chance_info <- obstacles_chance(game$map$unit_clicked, check_hovered_id(), game$map$units)
-  #       chance_info_text <- paste0(round(chance_info$chance*100),"%")
-  #     }
-  #   }
-  #   
-  #   infoBox("Chance", chance_info_text, icon = icon("bullseye"), color = "blue")
-  # })
+  output$top <- renderInfoBox({
+
+    top <- ""
+
+    if(!is.null(game$data)){
+      gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
+      
+      d <- gs_read(gs) %>%
+        filter(poziom==input$level)
+      
+      top <- max(d$ruchy)
+    }
+
+    infoBox("Rekord", top, icon = icon("bullseye"), color = "blue")
+  })
   
   
 })

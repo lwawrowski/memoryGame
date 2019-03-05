@@ -11,8 +11,8 @@ dashboardPage(
     useShinyjs(),
     fluidRow(
       box(plotOutput("distPlot", click = "plot_click", width = "800px", height = "500px"), width = 9),
-      infoBox(title = "Rekord", icon = icon("cog"), color = "blue", width = 3, value = 0),
-      # infoBoxOutput("top", width = 2),
+      # infoBox(title = "Rekord", icon = icon("cog"), color = "blue", width = 3, value = 0),
+      infoBoxOutput("top", width = 3),
       infoBoxOutput("moves", width = 3)
   ))
 )
