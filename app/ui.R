@@ -1,9 +1,3 @@
-library(shiny)
-library(shinydashboard)
-library(tidyverse)
-library(shinyjs)
-library(ggfittext)
-
 # zbieranie danych na temat liczby ruchów
 
 dashboardPage(
@@ -18,7 +12,6 @@ dashboardPage(
     fluidRow(
       box(plotOutput("distPlot", click = "plot_click", width = "800px", height = "500px"), width = 9),
       infoBox(title = "Rekord", icon = icon("cog"), color = "blue", width = 3, value = 0),
-      # infoBox(title = "Liczba ruchów", icon = icon("cog"), color = "blue", width = 3, value = game$data$points)
       # infoBoxOutput("top", width = 2),
       infoBoxOutput("moves", width = 3)
   ))

@@ -1,0 +1,6 @@
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+library(shinyjs)
+library(ggfittext)
+library(googlesheets)

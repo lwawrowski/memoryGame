@@ -1,9 +1,3 @@
-library(shiny)
-library(shinydashboard)
-library(tidyverse)
-library(shinyjs)
-library(ggfittext)
-
 shinyServer(function(input, output) {
   
   game <- reactiveValues(data = NULL)
