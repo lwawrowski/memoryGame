@@ -56,7 +56,6 @@ shinyServer(function(input, output) {
       top <- "-"
     }
     
-    
     # game object
     
     game$data <- list(database=database,

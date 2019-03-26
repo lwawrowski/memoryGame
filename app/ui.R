@@ -5,7 +5,8 @@ dashboardPage(
   dashboardSidebar(radioButtons("level", "Zakres materiału", c("Miary klasyczne - interpretacje" = "2",
                                                                "Miary klasyczne - symbole" = "1",
                                                                "Miary pozycyjne - interpretacje" = "4",
-                                                               "Miary pozycyjne - symbole" = "3")),
+                                                               "Miary pozycyjne - symbole" = "3",
+                                                               "Funkcje excela" = "5")),
                    actionButton("newGame", "Nowa gra")),
   dashboardBody(
     useShinyjs(),
