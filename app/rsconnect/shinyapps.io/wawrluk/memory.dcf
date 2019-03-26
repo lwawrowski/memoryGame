@@ -1,0 +1,12 @@
+name: memory
+title: memory
+username:
+account: wawrluk
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 815907
+bundleId: 1966649
+url: https://wawrluk.shinyapps.io/memory/
+when: 1553630669.68102
+asMultiple: FALSE
+asStatic: FALSE

@@ -197,7 +197,7 @@ shinyServer(function(input, output) {
                                 poziom=input$level,
                                 ruchy=game$data$points)
               
-              gs <- game$data$gs
+              gs <- gs_key("1niK-cua22XNK20adjzuOFqIWLGHEheJJCdvor2wU_Qk")
               
               # gs_edit_cells(gs, ws = "log", input = log, trim = TRUE)
               gs_add_row(gs, ws = "log", input = log)
@@ -237,7 +237,7 @@ shinyServer(function(input, output) {
       moves <- game$data$points
     }
 
-    infoBox("Ruchy", moves, icon = icon("bullseye"), color = "blue")
+    infoBox("Ruchy", moves, icon = icon("gamepad"), color = "light-blue")
   })
   
   output$top <- renderInfoBox({
@@ -261,7 +261,7 @@ shinyServer(function(input, output) {
       
     }
 
-    infoBox("Rekord", top, icon = icon("bullseye"), color = "blue")
+    infoBox("Rekord", top, icon = icon("poll"), color = "blue")
   })
   
   
