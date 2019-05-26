@@ -6,7 +6,10 @@ dashboardPage(
                                                                "Miary klasyczne - symbole" = "1",
                                                                "Miary pozycyjne - interpretacje" = "4",
                                                                "Miary pozycyjne - symbole" = "3",
-                                                               "Funkcje excela" = "5")),
+                                                               "Funkcje excela" = "5",
+                                                               "Korelacje cech" = "6",
+                                                               "Regresja - interpretacje" = "8",
+                                                               "Regresja - symbole" = "7")),
                    actionButton("newGame", "Nowa gra")),
   dashboardBody(
     useShinyjs(),
